@@ -9,9 +9,8 @@ Participation is subject to the
 
 ## Demo page
 
-The `index.html` page
-is published to
-`https://browser-support.netlify.app`.
+The `index.html` page is published to
+`https://oddbird.github.io/browser-support/index.html`.
 
 To start a local server
 for testing, run:

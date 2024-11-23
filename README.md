@@ -3,8 +3,18 @@
 A web component for showing browser-support data
 from the Web Features project.
 
+This is inspired by the official
+[`baseline-status` component](https://github.com/web-platform-dx/baseline-status)
+from Google and the Web Platform DX community group.
+It currently uses their `https://api.webstatus.dev/v1/features/` API.
+
 ## Features
 
+- Stand-alone component, without Lit or other frameworks
+- Responsive to font sizes, available space, and light/dark schemes
+- Allows customization of the title markup (`h2` by default)
+- 'Newly supported' web features show a timeline towards broad support
+- Allows for simple light-dom fallback & progressive enhancement
 
 **[Demo](https://oddbird.github.io/browser-support/index.html)**
 

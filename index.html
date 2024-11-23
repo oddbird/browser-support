@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" style="color-scheme: light dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Demo of slide-deck Web Component" />
+    <title>Browser-Support Web Component Demo</title>
+    <style>
+      @layer reset, props, base;
+
+      not-browser-support {
+        border: medium solid gray;
+        border-radius: 0.5em;
+        background: Canvas;
+        color: CanvasText;
+        display: grid;
+        gap: 0.5lh;
+        padding: 1em 0.5lh;
+
+        > * { margin: unset; }
+      }
+
+      @layer base {
+        html {
+          font-family: var(--serif);
+          color-scheme: light dark;
+        }
+
+        body {
+          font-size: var(--text-normal);
+          padding: var(--gap);
+        }
+
+        code:not(pre *) {
+          background: linear-gradient(
+            -80deg,
+            transparent 0.5ch,
+            var(--pink-bg) 0.5ch calc(100% - 0.5ch),
+            transparent calc(100% - 0.5ch)
+          ) no-repeat 0 1ex;
+          text-shadow: 2px 2px 0 Canvas;
+        }
+      }
+
+      @layer props {
+        html {
+          --pink-dark-: #B6236C;
+          --pink-light-: #FE84B4;
+          --blue-dark-: #205769;
+          --blue-light-: #8EC6DA;
+
+          --pink: light-dark(var(--pink-dark-), var(--pink-light-));
+          --pink-bg: color-mix(in oklab,
+            light-dark(var(--pink-light-), var(--pink-dark-)),
+            Canvas
+          );
+
+          --blue: light-dark(var(--blue-dark-), var(--blue-light-));
+          --blue-bg: color-mix(in oklab,
+            light-dark(var(--blue-light-), var(--blue-dark-)),
+            Canvas
+          );
+
+          @supports not (fill: color-mix(in hsl, light-dark(red, red), red)) {
+            --pink: var(--pink-dark-);
+            --blue: var(--blue-dark-);
+            --pink-bg: var(--pink-light-);
+            --blue-bg: var(--blue-light-);
+
+            @media (prefers-color-scheme: dark) {
+              --pink: var(--pink-light-);
+              --blue: var(--blue-light-);
+              --pink-bg: var(--pink-dark-);
+              --blue-bg: var(--blue-dark-);
+            }
+          }
+
+          /* from https://modernfontstacks.com/ */
+          /* old style, industrial, slab */
+          --serif: 'Iowan Old Style', 'Palatino Linotype', 'URW Palladio L', P052, serif;
+          --sans: Bahnschrift, 'DIN Alternate', 'Franklin Gothic Medium', 'Nimbus Sans Narrow', sans-serif-condensed, sans-serif;
+          --slab: Rockwell, 'Rockwell Nova', 'Roboto Slab', 'DejaVu Serif', 'Sitka Small', serif;
+        }
+
+        body {
+          --text-small: clamp(0.938rem, 0.824rem + 0.568cqi, 1.25rem);
+          --text-normal: clamp(1.25rem, 1.023rem + 1.136cqi, 1.875rem);
+          --text-large: clamp(1.35rem, 0.818rem + 2.659cqi, 2.813rem);
+          --text-xlarge: clamp(1.7rem, 0.784rem + 4.58cqi, 4.219rem);
+          --gap: clamp(2cqi, 0.5lh, 5cqi);
+        }
+      }
+
+      @layer reset {
+        * { box-sizing: border-box; }
+        html { block-size: 100%; }
+        body { margin: unset; }
+
+        h1, h2, h3, h4, h5, h6 {
+          text-wrap: balance;
+        }
+
+        p, li {
+          text-wrap: pretty;
+        }
+
+        picture { display: contents; }
+        img { display: block; }
+
+        img,
+        svg {
+          max-inline-size: 100%;
+          block-size: auto;
+        }
+
+        input,
+        button,
+        textarea,
+        select {
+          font: inherit;
+        }
+
+        pre {
+          max-inline-size: 100%;
+          overflow: auto;
+          border: thin solid;
+
+          > code {
+            display: block;
+            padding: 1em;
+          }
+        }
+      }
+    </style>
+    <script type="module" src="browser-support.js"></script>
+  </head>
+  <body>
+    <h1>A browser-support component</h1>
+    <p>
+      Using the web platform features data behind MDN & Baseline,
+      along with some of the Baseline language and icons.
+      I imagine there are a lot of improvements
+      that could be made here,
+      and I'd be very glad for
+      <a href="https://github.com/oddbird/browser-support/issues">
+        suggestions and improvements</a>!
+    </p>
+
+    <ul>
+      <li>Stand-alone component, without Lit or other frameworks</li>
+      <li>Responsive to font sizes, available space, and light/dark schemes</li>
+      <li>Allows customization of the title markup (<code>h2</code> by default)</li>
+      <li>'Newly supported' web features show a timeline towards broad support</li>
+      <li>Allows for simple light-dom fallback & progressive enhancement</li>
+    </ul>
+
+    <browser-support data-feature="container-queries"></browser-support>
+    <browser-support data-feature="container-style-queries"></browser-support>
+    <browser-support data-feature="relative-color"></browser-support>
+
+    <h2>Progressive Enhancement</h2>
+
+    <pre><code>&lt;browser-support>
+  &lt;h3 slot="title">CSS Grid Layout&lt;/h3>
+  &lt;a href="https://web-platform-dx.github.io/web-features-explorer/features/grid/">
+    Browser support for CSS &lt;code>grid&lt;/code> layout
+  &lt;/a>
+&lt;/browser-support></code></pre>
+
+    <not-browser-support>
+      <h3 slot="title">CSS Grid Layout</h3>
+      <a href="https://web-platform-dx.github.io/web-features-explorer/features/grid/">
+        Browser support for CSS <code>grid</code> layout
+      </a>
+    </not-browser-support>
+
+    <browser-support>
+      <h3 slot="title">CSS Grid Layout</h3>
+      <a href="https://web-platform-dx.github.io/web-features-explorer/features/grid/">
+        Browser support for CSS <code>grid</code> layout
+      </a>
+    </browser-support>
+
+    <browser-support>
+      <h3 slot="title">The <code>:fake()</code> selector</h3>
+      <a href="https://web-platform-dx.github.io/web-features-explorer/features/fake/">
+        Browser support for the <code>:fake</code> selector
+      </a>
+    </browser-support>
+  </body>
+</html>

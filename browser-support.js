@@ -37,7 +37,13 @@ class BrowserSupport extends HTMLElement {
         ${BrowserSupport.BASELINE_ICONS.no_data}
         <strong>unknown</strong> support
       </div>
-      <progress part="progress" max="30"></progress>
+      <div part="wide" hidden>
+        <progress part="progress" max="30"></progress>
+        <span>
+          wide support
+          <strong part="wide-date"></strong>
+        </span>
+      </div>
     `;
     const shadowRoot = node.attachShadow({ mode: "open" });
     shadowRoot.appendChild(template.content.cloneNode(true));
@@ -137,8 +143,16 @@ class BrowserSupport extends HTMLElement {
         translate: -30%;
       }
 
-      progress:not([value]) {
-        display: none;
+      [part=wide] {
+        align-items: center;
+        border-block-start: thin dotted;
+        display: flex;
+        flex-flow: wrap;
+        font-size: smaller;
+        font-style: italic;
+        gap: 1ch;
+        margin-block-start: 0.5lh;
+        padding-block-start: 0.5lh;
       }
 
       progress[value] {
@@ -150,7 +164,8 @@ class BrowserSupport extends HTMLElement {
         block-size: 1em;
         border: unset;
         border-radius: 2px;
-        inline-size: 100%;
+        min-inline-size: 40%;
+        flex: 1;
       }
 
       progress[data-rank=low] {
@@ -169,6 +184,8 @@ class BrowserSupport extends HTMLElement {
       progress[value]::-webkit-progress-value {
         background: var(--status-progress);
       }
+
+      [hidden] { display: none !important; }
 
       visually-hidden:not(:focus-within) {
         clip: rect(0 0 0 0);
@@ -259,7 +276,7 @@ class BrowserSupport extends HTMLElement {
   #featureLink;
   #featureId;
   #featureData;
-  #ui;
+  #ui = {};
 
   set title(value) {
     this.#ui.title.innerHTML = value;
@@ -325,8 +342,22 @@ class BrowserSupport extends HTMLElement {
 
     if (value.status === 'newly') {
       const progress = this.#monthsSince(date);
-      this.#ui.progress.innerHTML = `${progress} months`;
+      this.#ui.progress.innerHTML = `in ${30 - progress} months`;
       this.#ui.progress.value = progress;
+
+      const highDate = new Date(date.setMonth(date.getMonth() + 30));
+      const highDateTime = `
+      <time datetime="${highDate.toISOString()}">${
+        date.toLocaleDateString(undefined, {
+          timeZone: 'UTC',
+          year: 'numeric',
+          month: 'long',
+        })
+      }</time>
+    `;
+      this.#ui['wide-date'].innerHTML = highDateTime;
+
+      this.#ui.wide.removeAttribute('hidden');
 
       if (progress <= 12) {
         this.#ui.progress.dataset.rank = 'low';
@@ -347,11 +378,11 @@ class BrowserSupport extends HTMLElement {
     BrowserSupport.#appendShadowTemplate(this);
     BrowserSupport.#adoptShadowStyles(this);
 
-    this.#ui = {
-      title: this.shadowRoot.querySelector('[part=title]'),
-      status: this.shadowRoot.querySelector('[part=status]'),
-      progress: this.shadowRoot.querySelector('[part=progress]'),
-    };
+    const uiParts = this.shadowRoot.querySelectorAll('[part]');
+    uiParts.forEach((part) => {
+      const partName = part.getAttribute('part');
+      this.#ui[partName] = part;
+    });
 
     BrowserSupport.#browsers.forEach((browser) => {
       const browserEl = this.shadowRoot.getElementById(browser);

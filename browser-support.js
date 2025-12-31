@@ -55,16 +55,16 @@ class BrowserSupport extends HTMLElement {
       :host {
         --status-no-data: #595959;
         --status-limited: #b06405;
-        --status-newly: #1a73e8;
-        --status-widely: #158939;
+        --status-low: #1a73e8;
+        --status-high: #158939;
         --status-outline: #d9d9d9;
 
         @supports (color: light-dark(red, blue)) {
           --scheme-support: ;
           --status-no-data: light-dark(#595959, #9f9f9f);
           --status-limited: light-dark(#b06405, #eb8704);
-          --status-newly: light-dark(#1a73e8, #61a1fe);
-          --status-widely: light-dark(#158939, #4cb462);
+          --status-low: light-dark(#1a73e8, #61a1fe);
+          --status-high: light-dark(#158939, #4cb462);
           --status-outline: light-dark(#d9d9d9, #484848);
         }
 
@@ -87,15 +87,15 @@ class BrowserSupport extends HTMLElement {
       :host([data-status=limited]) {
         --status-color: var(--status-limited);
       }
-      :host([data-status=newly]) {
-        --status-color: var(--status-newly);
+      :host([data-status=low]) {
+        --status-color: var(--status-low);
       }
-      :host([data-status=widely]) {
-        --status-color: var(--status-widely);
+      :host([data-status=high]) {
+        --status-color: var(--status-high);
       }
 
       [data-status=available] {
-        --status-color: var(--status-widely);
+        --status-color: var(--status-high);
       }
 
       [data-status=unavailable] {
@@ -156,7 +156,7 @@ class BrowserSupport extends HTMLElement {
       }
 
       progress[value] {
-        --status-progress: var(--status-newly);
+        --status-progress: var(--status-low);
         -moz-appearance: none;
         -webkit-appearance: none;
         appearance: none;
@@ -172,7 +172,7 @@ class BrowserSupport extends HTMLElement {
         --status-progress: var(--status-limited);
       }
       progress[data-rank=high] {
-        --status-progress: var(--status-widely);
+        --status-progress: var(--status-high);
       }
 
       progress[value]::-webkit-progress-bar {
@@ -209,15 +209,15 @@ class BrowserSupport extends HTMLElement {
         <path class="back" d="M8 2L10 4L4 10L10 16L8 18L0 10L8 2Z"/>
         <path class="back" d="M28 2L36 10L28 18L26 16L32 10L26 4L28 2Z"/>
       </svg>`,
-    widely: `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 20" width="36" height="20" data-svg="widely">
+    high: `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 20" width="36" height="20" data-svg="high">
         <path d="M18 8L20 10L18 12L16 10L18 8Z"/>
         <path d="M26 0L28 2L10 20L0 10L2 8L10 16L26 0Z"/>
         <path class="back" d="M28 2L26 4L32 10L26 16L22 12L20 14L26 20L36 10L28 2Z"/>
         <path class="back" d="M10 0L2 8L4 10L10 4L14 8L16 6L10 0Z"/>
       </svg>`,
-    newly: `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 20" width="36" height="20" data-svg="newly">
+    low: `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 20" width="36" height="20" data-svg="low">
         <path class="back" d="m10 0 2 2-2 2-2-2 2-2Zm4 4 2 2-2 2-2-2 2-2Zm16 0 2 2-2 2-2-2 2-2Zm4 4 2 2-2 2-2-2 2-2Zm-4 4 2 2-2 2-2-2 2-2Zm-4 4 2 2-2 2-2-2 2-2Zm-4-4 2 2-2 2-2-2 2-2ZM6 4l2 2-2 2-2-2 2-2Z"/>
         <path d="m26 0 2 2-18 18L0 10l2-2 8 8L26 0Z"/>
       </svg>`,
@@ -270,7 +270,6 @@ class BrowserSupport extends HTMLElement {
   }
 
   static EXPLORE = `https://web-platform-dx.github.io/web-features-explorer/features/`;
-  static API = `https://api.webstatus.dev/v1/features/`;
 
   explore;
   #featureLink;
@@ -290,8 +289,8 @@ class BrowserSupport extends HTMLElement {
     this.#featureId = value;
     this.#fetchData();
 
-    this.explore = this.featureLink
-      ? this.featureLink.href
+    this.explore = this.#featureLink
+      ? this.#featureLink.href
       : `${BrowserSupport.EXPLORE}${value}/`;
 
     this.title = value;
@@ -309,19 +308,19 @@ class BrowserSupport extends HTMLElement {
   get featureData() { return this.#featureData; }
 
   set baseline(value) {
-    this.dataset.status = value.status;
+    this.dataset.status = this.status;
 
-    if (value.status === 'limited') {
+    if (this.status === 'limited') {
       this.#ui.status.innerHTML = `
-        ${BrowserSupport.BASELINE_ICONS[value.status]}
+        ${BrowserSupport.BASELINE_ICONS[this.status]}
         <a href="${BrowserSupport.EXPLORE}${this.featureId}" part="link">
-          <strong>${value.status}</strong> support
+          <strong>${this.baselineHeadline}</strong> support
         </a>
       `;
       return;
     }
 
-    const date = new Date(value.low_date);
+    const date = new Date(value.baseline_low_date);
     const dateTime = `
       <time datetime="${date.toISOString()}">${
         date.toLocaleDateString(undefined, {
@@ -333,14 +332,14 @@ class BrowserSupport extends HTMLElement {
     `;
 
     this.#ui.status.innerHTML = `
-      ${BrowserSupport.BASELINE_ICONS[value.status]}
+      ${BrowserSupport.BASELINE_ICONS[this.status]}
       ${dateTime} –
       <a href="${BrowserSupport.EXPLORE}${this.featureId}" part="link">
-        <strong>${value.status}</strong> supported
+        <strong>${this.baselineHeadline}</strong> supported
       </a>
     `;
 
-    if (value.status === 'newly') {
+    if (this.status === 'low') {
       const progress = this.#monthsSince(date);
       this.#ui.progress.innerHTML = `in ${30 - progress} months`;
       this.#ui.progress.value = progress;
@@ -368,7 +367,24 @@ class BrowserSupport extends HTMLElement {
   }
 
   get status() {
-    return this.featureData.baseline.status;
+    const status = this.featureData.status.baseline;
+    if (status === false && this.featureData.status.support ) return 'limited';
+    if (status === 'low') return 'low';
+    if (status === 'high') return 'high';
+    return status;
+  }
+
+  get baselineHeadline() {
+    switch (this.status) {
+      case 'limited':
+        return 'Limited';
+      case 'low':
+        return 'Newly';
+      case 'high':
+        return 'Widely';
+      default:
+        return '';
+    }
   }
 
   constructor() {
@@ -408,11 +424,12 @@ class BrowserSupport extends HTMLElement {
 
   #render() {
     this.title = this.featureData.name;
-    this.baseline = this.featureData.baseline;
 
+    this.baseline = this.featureData.status;
     BrowserSupport.#browsers.forEach((browser) => {
-      const data = this.featureData.browser_implementations[browser];
-      const status = data?.status || 'unavailable';
+      const data = this.featureData.status.support[browser];
+      const status = !!data ? 'available' : 'unavailable';
+
       const output = this.#ui[browser];
       output.parentElement.dataset.status = status;
       output.innerHTML = BrowserSupport.#browserSupportIcon(status);
@@ -421,8 +438,8 @@ class BrowserSupport extends HTMLElement {
 
   async #fetchData() {
     this.dataset.status="fetching";
+    const response = await fetch(`${BrowserSupport.EXPLORE}${this.featureId}.json`);
 
-    const response = await fetch(`${BrowserSupport.API}${this.featureId}`);
 
     if (!response.ok) {
       this.dataset.status="no-data";
@@ -449,12 +466,12 @@ class BrowserSupport extends HTMLElement {
   }
 
   #getFeatureFromLink = () => {
-    this.featureLink = this
+    this.#featureLink = this
       .querySelector(`a[href^='${BrowserSupport.EXPLORE}']`);
 
-    if (!this.featureLink) return;
+    if (!this.#featureLink) return;
 
-    return this.featureLink.href
+    return this.#featureLink.href
       .replace(BrowserSupport.EXPLORE, '')
       .split('/').at(0);
   }

@@ -6,7 +6,8 @@ from the Web Features project.
 This is inspired by the official
 [`baseline-status` component](https://github.com/web-platform-dx/baseline-status)
 from Google and the Web Platform DX community group.
-It currently uses their `https://api.webstatus.dev/v1/features/` API.
+It uses the API provided by the
+[Web platform features explorer](https://web-platform-dx.github.io/web-features-explorer/).
 
 ## Features
 

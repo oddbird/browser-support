@@ -1,6 +1,6 @@
 {
   "name": "@oddbird/browser-support",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A web component for showing browser-support data from the Web Features project",
   "main": "browser-support.js",
   "scripts": {

@@ -79,8 +79,8 @@ Make sure you include the `<script>` in your project
 
 Or use the built-in
 [WebC](https://www.11ty.dev/docs/languages/webc/) component
-with [Eleventy](https://www.11ty.dev/docs/),
-by adding `"npm:@oddbird/browser-support/*.webc"`
+with [Eleventy](https://www.11ty.dev/docs/).
+First add `"npm:@oddbird/browser-support/*.webc"`
 to the Eleventy WebC Plugin `components` registry:
 
 ```js
@@ -93,6 +93,13 @@ module.exports = function (eleventyConfig) {
     ],
   });
 }
+```
+
+Then make sure to include WebC bundled JS
+somewhere in your layout:
+
+```html
+<script webc:keep @raw="getBundle('js')" type="module"></script>
 ```
 
 ### Slots
